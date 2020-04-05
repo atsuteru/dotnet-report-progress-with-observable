@@ -22,6 +22,8 @@ namespace MyApp.WPF.Views
         {
             this.OneWayBind(ViewModel, vm => vm.ProgressPercentage, v => v.ProgressBar.Value).DisposeWith(d);
             this.OneWayBind(ViewModel, vm => vm.Logs, v => v.LogListBox.ItemsSource).DisposeWith(d);
+            this.BindCommand(ViewModel, vm => vm.StartCommand, v => v.StartButton).DisposeWith(d);
+            this.BindCommand(ViewModel, vm => vm.CancelCommand, v => v.CancelButton).DisposeWith(d);
         }
     }
 }

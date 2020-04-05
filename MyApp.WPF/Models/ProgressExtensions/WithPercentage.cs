@@ -1,4 +1,6 @@
-﻿namespace MyApp.WPF.Models.ProgressExtensions
+﻿using System.Threading;
+
+namespace MyApp.WPF.Models.ProgressExtensions
 {
     public class WithPercentage<TNotification>
     {

@@ -13,15 +13,20 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0">
             <TextBlock Text="Report progress task sample" HorizontalAlignment="Center"/>
         </StackPanel>
-        <StackPanel Grid.Row="1">
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Button Padding="20, 5" Margin="0, 0, 10, 0" x:Name="StartButton" Content="Start" />
+            <Button Padding="20, 5" Margin="0, 0, 10, 0" x:Name="CancelButton" Content="Cancel"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2">
             <ProgressBar x:Name="ProgressBar" Height="20" Margin="0,10" Minimum="0" Maximum="100" Value="30" />
         </StackPanel>
-        <ListBox Grid.Row="2" x:Name="LogListBox" Background="Black" Foreground="White"
+        <ListBox Grid.Row="3" x:Name="LogListBox" Background="Black" Foreground="White"
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListBox.ItemTemplate>
