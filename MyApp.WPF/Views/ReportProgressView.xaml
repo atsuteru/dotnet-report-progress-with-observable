@@ -1,0 +1,37 @@
+﻿<rxui:ReactiveUserControl 
+             x:Class="MyApp.WPF.Views.ReportProgressView"
+             x:TypeArguments="vm:ReportProgressViewModel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:rxui="http://reactiveui.net"
+             xmlns:vm="clr-namespace:MyApp.WPF.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Margin="20, 5, 20, 5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="Report progress task sample" HorizontalAlignment="Center"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1">
+            <ProgressBar x:Name="ProgressBar" Height="20" Margin="0,10" Minimum="0" Maximum="100" Value="30" />
+        </StackPanel>
+        <ListBox Grid.Row="2" x:Name="LogListBox" Background="Black" Foreground="White"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Time, StringFormat={}{0:[HH:mm:ss] }}"/>
+                        <TextBlock Text="{Binding Message, Mode=OneWay}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</rxui:ReactiveUserControl>
