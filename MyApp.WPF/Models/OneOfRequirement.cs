@@ -1,7 +1,6 @@
 ﻿using MyApp.WPF.Models.ProgressExtensions;
 using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,24 +22,23 @@ namespace MyApp.WPF.Models
             };
         }
 
-        public IObservable<string> TimeConsumingTask(CancelableProgressWithPercentage<string> progress)
+        public IObservable<ProgressWithPercentage<string>> TimeConsumingTask(OneOfRequest request)
         {
-            return Observable
-                .FromAsync(() => TimeConsumingProcessAsync(progress));
+            return ProgressWithPercentage<string>.CreateObservableFromAsync(TimeConsumingProcessAsync, request);
         }
 
-        protected virtual Task<string> TimeConsumingProcessAsync(CancelableProgressWithPercentage<string> progress)
+        protected virtual async Task TimeConsumingProcessAsync(ProgressObserver<ProgressWithPercentage<string>> progress, OneOfRequest request)
         {
             foreach (var step in Steps)
             {
-                if (progress.CancellationToken.IsCancellationRequested)
-                {
-                    return Task.FromException<string>(new TaskCanceledException("Your pizza is canncelled"));
-                }
-                progress.ReportWithPercentage(step.Value.Invoke().Result, step.Key);
+                await progress.ExitIfCanceled();
+
+                progress.Report(step.Value.Invoke().Result, step.Key);
             }
 
-            return Task.FromResult("Your pizza is ready!");
+            //await progress.ThrowException(new Exception("Your pizza has been burnt!!"));
+
+            await progress.ReportComplete("Your pizza is ready!");
         }
 
         protected Task<string> KneadThePizzaDoughProcess()
