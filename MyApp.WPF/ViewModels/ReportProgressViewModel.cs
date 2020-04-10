@@ -50,7 +50,7 @@ namespace MyApp.WPF.ViewModels
                 .CreateFromObservable(() =>
                 {
                     Logs.Clear();
-                    return Locator.Current.GetService<IOneOfRequirement>()
+                    return Locator.Current.GetService<OneOfRequirement>()
                         .TimeConsumingTask(new OneOfRequest())
                         .TakeUntil(CancelCommand)
                         .SubscribeOn(ThreadPoolScheduler.Instance);

@@ -12,7 +12,7 @@ namespace MyApp.WPF
         protected override void OnStartup(StartupEventArgs e)
         {
             // Regist Models
-            Locator.CurrentMutable.RegisterLazySingleton<IOneOfRequirement>(() => new OneOfRequirement());
+            Locator.CurrentMutable.RegisterLazySingleton(() => new OneOfRequirement());
 
             base.OnStartup(e);
         }

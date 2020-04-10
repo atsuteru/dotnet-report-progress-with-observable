@@ -6,19 +6,36 @@ using System.Threading.Tasks;
 
 namespace MyApp.WPF.Models
 {
-    public class OneOfRequirement : IOneOfRequirement
+    public class OneOfRequirement
     {
-        public Dictionary<double, Func<Task<string>>> Steps { get; }
+        protected struct TimeConsumingStep
+        {
+            public double ProgressPercentage { get; }
+            public Func<Task<string>> Process { get; }
+
+            public TimeConsumingStep(double progressPercentage, Func<Task<string>> process)
+            {
+                ProgressPercentage = progressPercentage;
+                Process = process;
+            }
+
+            public Task<string> InvokeAsync()
+            {
+                return Process.Invoke();
+            }
+        }
+
+        protected List<TimeConsumingStep> Steps { get; }
 
         public OneOfRequirement()
         {
-            Steps = new Dictionary<double, Func<Task<string>>>()
+            Steps = new List<TimeConsumingStep>()
             {
-                { 20, KneadThePizzaDoughProcess},
-                { 40, CutTheIngredientsProcess},
-                { 60, ToppingPizzaProcess},
-                { 80, BakingPizzaProcess},
-                { 100, PackagingPizzaProcess},
+                new TimeConsumingStep(20, KneadThePizzaDoughProcess),
+                new TimeConsumingStep(40, CutTheIngredientsProcess),
+                new TimeConsumingStep(60, ToppingPizzaProcess),
+                new TimeConsumingStep(80, BakingPizzaProcess),
+                new TimeConsumingStep(100, PackagingPizzaProcess),
             };
         }
 
@@ -33,7 +50,7 @@ namespace MyApp.WPF.Models
             {
                 await progress.ExitIfCanceled();
 
-                progress.Report(step.Value.Invoke().Result, step.Key);
+                progress.Report(step.InvokeAsync().Result, step.ProgressPercentage);
             }
 
             //await progress.ThrowException(new Exception("Your pizza has been burnt!!"));
