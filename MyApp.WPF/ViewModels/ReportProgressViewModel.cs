@@ -1,5 +1,6 @@
 ﻿using MyApp.WPF.Models;
 using MyApp.WPF.Models.ProgressExtensions;
+using MyApp.WPF.ViewModels.ProgressExtensions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Splat;
@@ -9,8 +10,6 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MyApp.WPF.ViewModels
 {
@@ -23,11 +22,9 @@ namespace MyApp.WPF.ViewModels
 
         public ObservableCollection<LogItem> Logs { get; set; }
 
-        public ReactiveCommand<Unit, string> StartCommand { get; protected set; }
+        public ReactiveCommand<Unit, ProgressWithPercentage<string>> StartCommand { get; protected set; }
 
         public ReactiveCommand<Unit, Unit> CancelCommand { get; protected set; }
-
-        public CancelableProgressWithPercentage<string> ExecutionProgress { get; }
 
         public ReportProgressViewModel()
         {
@@ -35,79 +32,80 @@ namespace MyApp.WPF.ViewModels
 
             Logs = new ObservableCollection<LogItem>();
 
-            ExecutionProgress = new CancelableProgressWithPercentage<string>(progress =>
-            {
-                ProgressPercentage = progress.Percentage;
-                Logs.Add(new LogItem()
-                {
-                    Time = DateTime.Now,
-                    Message = progress.Notification
-                });
-            });
-
             this.WhenActivated(d =>
             {
                 HandleActivation(d);
             });
         }
 
+        public IObserver<string> Receiver { get; set; }
+
+        [Reactive]
+        public bool IsCancel { get; set; }
+
         private void HandleActivation(CompositeDisposable d)
         {
-            CancellationTokenSource canceller = null;
-
             // Create command.
             StartCommand = ReactiveCommand
                 .CreateFromObservable(() =>
                 {
-                    canceller?.Dispose();
-                    canceller = new CancellationTokenSource();
+                    Logs.Clear();
                     return Locator.Current.GetService<IOneOfRequirement>()
-                        .TimeConsumingTask(ExecutionProgress.With(canceller.Token))
+                        .TimeConsumingTask(new OneOfRequest())
+                        .TakeUntil(CancelCommand)
                         .SubscribeOn(ThreadPoolScheduler.Instance);
                 });
-
+            
             // Create cancellation command.
             CancelCommand = ReactiveCommand
-                .Create(() =>
-                {
-                    canceller?.Cancel();
-                },
-                StartCommand.IsExecuting)
+                .Create(() => { }, StartCommand.IsExecuting)
                 .DisposeWith(d);
 
-            // Register the process that when the command was completed.
+            // Register the process that when the command progress received.
             StartCommand
-                .TakeUntil(CancelCommand)
-                .Subscribe(response =>
+                .SubscribeProgress(progress =>
                 {
-                    ProgressPercentage = 100;
+                    ProgressPercentage = progress.Percentage;
                     Logs.Add(new LogItem()
                     {
                         Time = DateTime.Now,
-                        Message = response
+                        Message = progress.Notification
                     });
-                })
-                .DisposeWith(d);
+                    if (progress.IsCompleted)
+                    {
+                        Logs.Add(new LogItem()
+                        {
+                            Time = DateTime.Now,
+                            Message = "Task completed."
+                        });
+                    }
+                });
 
-            // Register the process that when the command was canceled.
+            // Register the process that when the command error received.
             StartCommand
                 .ThrownExceptions
-                .Where(x => x is TaskCanceledException)
-                .Subscribe(exception =>
+                .Subscribe(error =>
                 {
                     ProgressPercentage = 0;
                     Logs.Add(new LogItem()
                     {
                         Time = DateTime.Now,
-                        Message = exception.Message
+                        Message = error.Message
+                    });
+                });
+
+            // Register the process that when the command was cancelled.
+            CancelCommand
+                .Subscribe(_ =>
+                {
+                    ProgressPercentage = 0;
+                    Logs.Add(new LogItem()
+                    {
+                        Time = DateTime.Now,
+                        Message = "Your pizza was cancelled."
                     });
                 })
                 .DisposeWith(d);
-
-            // Execute command
-            StartCommand.Execute().Subscribe(
-                onNext: response => { },
-                onError: exception => { });
         }
     }
 }

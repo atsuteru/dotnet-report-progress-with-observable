@@ -5,6 +5,6 @@ namespace MyApp.WPF.Models
 {
     public interface IOneOfRequirement
     {
-        IObservable<string> TimeConsumingTask(CancelableProgressWithPercentage<string> progress);
+        IObservable<ProgressWithPercentage<string>> TimeConsumingTask(OneOfRequest progress);
     }
 }
