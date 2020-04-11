@@ -1,6 +1,7 @@
 ﻿namespace MyApp.WPF.Models.ProgressExtensions
 {
-    public interface IProgressReporter<TNotification>
+    public interface IProgressReporter
     {
+        bool IsProgressChanged(IProgressReporter previewReport);
     }
 }

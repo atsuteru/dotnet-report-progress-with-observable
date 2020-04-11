@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MyApp.WPF.Models.ProgressExtensions
 {
-    public class ProgressWithPercentage<TNotification> : IProgressReporter<TNotification>
+    public class ProgressWithPercentage<TNotification> : IProgressReporter
     {
 
         public static IObservable<ProgressWithPercentage<TNotification>> CreateObservableFromAsync<TParam>(Func<ProgressObserver<ProgressWithPercentage<TNotification>>, TParam, Task> func, TParam param)
@@ -24,6 +24,15 @@ namespace MyApp.WPF.Models.ProgressExtensions
             Percentage = percentage;
             Notification = notification;
             IsCompleted = isCompleted;
+        }
+
+        public bool IsProgressChanged(IProgressReporter previewReport)
+        {
+            if (!(previewReport is ProgressWithPercentage<TNotification> target))
+            {
+                return true;
+            }
+            return (Percentage - target.Percentage) > 1d;
         }
     }
 }

@@ -4,11 +4,13 @@ using System.Threading.Tasks;
 
 namespace MyApp.WPF.Models.ProgressExtensions
 {
-    public class ProgressObserver<TProgressReporter>
+    public class ProgressObserver<TProgressReporter> where TProgressReporter : IProgressReporter
     {
         protected IObserver<TProgressReporter> Observer { get;  }
 
         protected CancellationToken CancellationToken { get; }
+
+        protected TProgressReporter PreviewReport { get; set; }
 
         public ProgressObserver(IObserver<TProgressReporter> observer, CancellationToken ct)
         {
@@ -16,8 +18,14 @@ namespace MyApp.WPF.Models.ProgressExtensions
             CancellationToken = ct;
         }
 
-        public void Report(TProgressReporter reporter)
+        public async Task Report(TProgressReporter reporter)
         {
+            if (reporter.IsProgressChanged(PreviewReport))
+            {
+                await Task.Delay(1);
+                CancellationToken.ThrowIfCancellationRequested();
+                PreviewReport = reporter;
+            }
             Observer.OnNext(reporter);
         }
         public Task ReportComplete(TProgressReporter reporter)

@@ -48,9 +48,7 @@ namespace MyApp.WPF.Models
         {
             foreach (var step in Steps)
             {
-                await progress.ExitIfCanceled();
-
-                progress.Report(step.InvokeAsync().Result, step.ProgressPercentage);
+                await progress.Report(step.InvokeAsync().Result, step.ProgressPercentage);
             }
 
             //await progress.ThrowException(new Exception("Your pizza has been burnt!!"));
